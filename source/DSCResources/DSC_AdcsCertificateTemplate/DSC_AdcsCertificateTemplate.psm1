@@ -117,16 +117,6 @@ enum KeyUsage
     encipherOnly = 0x0100
     decipherOnly = 0x0080
 }
-<#
-.SYNOPSIS
-
-
-.PARAMETER Name
-
-
-.PARAMETER Ensure
-Specifies whether the Template should be added or removed.
-#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -218,8 +208,7 @@ function Get-TargetResource
             OverlapPeriod = New-TimeSpan `
                 -Seconds $certificateTemplate.pKIOverlapPeriod / 1000000
         }
-    }
-    else
+    } else
     {
         # Template is removed
         $result = @{
@@ -231,17 +220,6 @@ function Get-TargetResource
     return $result
 } # function Get-TargetResource
 
-<#
-    .SYNOPSIS
-        Adds or removes a CA Template.
-
-    .PARAMETER Name
-        Specifies the name of a certificate template. This name must always be the
-        template short name without spaces, and not the template display name.
-
-    .PARAMETER Ensure
-        Specifies whether the Template should be added or removed.
-#>
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -467,20 +445,6 @@ function Set-TargetResource
     }
 } # function Set-TargetResource
 
-<#
-    .SYNOPSIS
-        Tests if the CA Template is in the desired state.
-
-    .PARAMETER Name
-        Specifies the name of a certificate template. This name must always be the
-        template short name without spaces, and not the template display name.
-
-    .PARAMETER Ensure
-        Specifies whether the Template should be added or removed.
-
-    .OUTPUTS
-        Returns true if the CA Template is in the desired state.
-#>
 function Test-TargetResource
 {
     [CmdletBinding()]
