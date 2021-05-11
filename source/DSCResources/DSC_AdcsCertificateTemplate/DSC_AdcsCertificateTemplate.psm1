@@ -117,6 +117,14 @@ enum KeyUsage
     encipherOnly = 0x0100
     decipherOnly = 0x0080
 }
+<#
+    .SYNOPSIS
+        Returns an object containing the current state information for a Certificate Template.
+
+    .PARAMETER Name
+        Specifies the name of a certificate template. This name must always be the
+        template short name without spaces, and not the template display name.
+#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -126,6 +134,7 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name
+
     )
 
     Write-Verbose -Message ( @(
@@ -219,6 +228,54 @@ function Get-TargetResource
     $result.Add('Name', $Name)
     return $result
 } # function Get-TargetResource
+
+<#
+    .SYNOPSIS
+        Adds or removes a Certificate Template.
+
+    .PARAMETER Name
+        Specifies the name of a certificate template. This name must always be the
+        template short name without spaces, and not the template display name.
+
+    .PARAMETER DisplayName
+
+    .PARAMETER DefaultKeySpec
+
+    .PARAMETER Flags
+
+    .PARAMETER MaxIssuingDepth
+
+    .PARAMETER CriticalExtensions
+
+    .PARAMETER ExtendedKeyUsage
+
+    .PARAMETER DefaultCSPs
+
+    .PARAMETER RASignature
+
+    .PARAMETER EnrollmentFlag
+
+    .PARAMETER PrivateKeyFlag
+
+    .PARAMETER CertificateNameFlag
+
+    .PARAMETER MinimalKeySize
+
+    .PARAMETER TemplateSchemaVersion
+
+    .PARAMETER CertTemplateOID
+
+    .PARAMETER CertificateApplicationPolicy
+
+    .PARAMETER KeyUsage
+
+    .PARAMETER ExpirationPeriod
+
+    .PARAMETER OverlapPeriod
+
+    .PARAMETER Ensure
+        Specifies whether the Template should be added or removed.
+#>
 
 function Set-TargetResource
 {
@@ -445,6 +502,59 @@ function Set-TargetResource
     }
 } # function Set-TargetResource
 
+<#
+    .SYNOPSIS
+        Tests if the Certificate Template is in the desired state.
+
+    .SYNOPSIS
+        Adds or removes a Certificate Template.
+
+    .PARAMETER Name
+        Specifies the name of a certificate template. This name must always be the
+        template short name without spaces, and not the template display name.
+
+    .PARAMETER DisplayName
+
+    .PARAMETER DefaultKeySpec
+
+    .PARAMETER Flags
+
+    .PARAMETER MaxIssuingDepth
+
+    .PARAMETER CriticalExtensions
+
+    .PARAMETER ExtendedKeyUsage
+
+    .PARAMETER DefaultCSPs
+
+    .PARAMETER RASignature
+
+    .PARAMETER EnrollmentFlag
+
+    .PARAMETER PrivateKeyFlag
+
+    .PARAMETER CertificateNameFlag
+
+    .PARAMETER MinimalKeySize
+
+    .PARAMETER TemplateSchemaVersion
+
+    .PARAMETER CertTemplateOID
+
+    .PARAMETER CertificateApplicationPolicy
+
+    .PARAMETER KeyUsage
+
+    .PARAMETER ExpirationPeriod
+
+    .PARAMETER OverlapPeriod
+
+    .PARAMETER Ensure
+        Specifies whether the Template should be added or removed.
+
+    .OUTPUTS
+        Returns true if the CA Template is in the desired state.
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]
