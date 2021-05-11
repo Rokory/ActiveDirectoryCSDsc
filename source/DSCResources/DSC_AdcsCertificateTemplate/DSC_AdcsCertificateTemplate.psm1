@@ -27,7 +27,8 @@ Import-Module -Name (
 # Import Localization Strings.
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
-enum Flags {
+enum Flags
+{
     CT_FLAG_AUTO_ENROLLMENT = 0x00000020
     CT_FLAG_MACHINE_TYPE = 0x00000040
     CT_FLAG_IS_CA = 0x00000080
@@ -41,12 +42,14 @@ enum Flags {
     CT_FLAG_EXPORTABLE_KEY = 0x00000010
 }
 
-enum DefaultKeySpec {
+enum DefaultKeySpec
+{
     AT_KEYEXCHANGE = 1
     AT_SIGNATURE = 2
 }
 
-enum EnrollmentFlag {
+enum EnrollmentFlag
+{
     CT_FLAG_INCLUDE_SYMMETRIC_ALGORITHMS = 0x00000001
     CT_FLAG_PEND_ALL_REQUESTS = 0x00000002
     CT_FLAG_PUBLISH_TO_KRA_CONTAINER = 0x00000004
@@ -67,7 +70,8 @@ enum EnrollmentFlag {
     CT_FLAG_SKIP_AUTO_RENEWAL = 0x00040000
 }
 
-enum PrivateKeyFlag {
+enum PrivateKeyFlag
+{
     CT_FLAG_REQUIRE_PRIVATE_KEY_ARCHIVAL = 0x00000001
     CT_FLAG_EXPORTABLE_KEY = 0x00000010
     CT_FLAG_STRONG_KEY_PROTECTION_REQUIRED = 0x00000020
@@ -84,7 +88,8 @@ enum PrivateKeyFlag {
     CT_FLAG_HELLO_LOGON_KEY = 0x00200000
 }
 
-enum CertificateNameFlag {
+enum CertificateNameFlag
+{
     CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT = 0x00000001
     CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT_ALT_NAME = 0x00010000
     CT_FLAG_SUBJECT_ALT_REQUIRE_DOMAIN_DNS = 0x00400000
@@ -100,7 +105,8 @@ enum CertificateNameFlag {
     CT_FLAG_OLD_CERT_SUPPLIES_SUBJECT_AND_ALT_NAME = 0x00000008
 }
 
-enum KeyUsage {
+enum KeyUsage
+{
     digitalSignature = 0x8000
     nonRepudation = 0x4000
     keyEncipherment = 0x2000
@@ -158,29 +164,15 @@ function Get-TargetResource
     if ($certificateTemplate | Get-Member -Name distinguishedName)
     {
         # Template is added
-        $flags = @()
-        $value = $certificateTemplate.flags
-        foreach ($itemName in [Enum]::GetNames([Flags])){
-            $item = [Enum]::Parse([Flags], $itemName)
-            if ($value -band $item) {
-                $flags += $item
-            }
-        }
+
+        # parse default CSPs
 
         $defaultCSPs = ($certificateTemplate.pKIDefaultCSPs -split ',').Trim()
+
         # remove numeric priority entries
         [int32]$result = 0
         $defaultCSPs = $defaultCSPs |
             Where-Object (-not ([int]::TryParse($PSItem, [ref]$result)))
-
-        $enrollmentFlag = @()
-        $value = $certificateTemplate.get('msPKI-Enrollment-Flag')
-        foreach ($itemName in [Enum]::GetNames([EnrollmentFlag])){
-            $item = [Enum]::Parse([EnrollmentFlag], $itemName)
-            if ($value -band $item) {
-                $enrollmentFlag += $item
-            }
-        }
 
         $result = @{
             Ensure = 'Present'
@@ -258,19 +250,26 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
+        [Parameter()]
         [System.String]
         $DisplayName = $Name,
         [Parameter(Mandatory = $true)]
         [DefaultKeySpec]
         $DefaultKeySpec,
+        [Parameter()]
         [Flags[]]
         $Flags,
+        [Parameter()]
         [System.Int32]
         $MaxIssuingDepth = 0,
+        [Parameter()]
         [Sytem.String[]]
         $CriticalExtensions,
+        [Parameter()]
         [Sytem.String[]]
+        [Parameter()]
         $ExtendedKeyUsage,
+        [Parameter()]
         [ValidateSet(
             'Microsoft RSA SChannel Cryptographic Provider',
             'Microsoft DH SChannel Cryptographic Provider',
@@ -284,30 +283,42 @@ function Set-TargetResource
             'Microsoft RSA SChannel Cryptographic Provider',
             'Microsoft DH SChannel Cryptographic Provider'
         ),
+        [Parameter()]
         [System.Int32]
         $RASignature = 0,
+        [Parameter()]
         [EnrollmentFlag[]]
         $EnrollmentFlag,
+        [Parameter()]
         [PrivateKeyFlag[]]
         $PrivateKeyFlag,
+        [Parameter()]
         [CertificateNameFlag[]]
         $CertificateNameFlag,
+        [Parameter()]
         [System.Int32]
         $MinimalKeySize = 2048,
+        [Parameter()]
         [ValidateSet(1, 2, 3, 4)]
         $TemplateSchemaVersion = 2,
+        [Parameter()]
         [System.String]
         $CertTemplateOID,
+        [Parameter()]
         [System.String[]]
         $CertificateApplicationPolicy,
+        [Parameter()]
         [KeyUsage[]]
         $KeyUsage,
+        [Parameter()]
         [System.TimeSpan]
         $ExpirationPeriod = (New-TimeSpan -Days 365),
+        [Parameter()]
         [System.TimeSpan]
         $OverlapPeriod = (New-TimeSpan -Days 30),
-        [ValidateSet('Present', 'Absent')]
+        [Parameter()]
         [System.String]
+        [ValidateSet('Present', 'Absent')]
         $Ensure = 'Present'
     )
 
@@ -316,7 +327,8 @@ function Set-TargetResource
             $($script:localizedData.SettingAdcsTemplateStatusMessage -f $Name)
         ) -join '' )
 
-    try {
+    try
+    {
         $ConfigContext = ([ADSI]"LDAP://RootDSE").ConfigurationNamingContext
         $certificateTemplates = `
             [ADSI] `
@@ -325,7 +337,8 @@ function Set-TargetResource
             [ADSI] `
             "LDAP://CN=$Name,$($certificateTemplates.distinguishedName)"
     }
-    catch {
+    catch
+    {
         New-InvalidOperationException -Message (
             $script:localizedData.InvalidOperationAddingAdcsTemplateMessage `
                 -f $Name
@@ -370,7 +383,8 @@ function Set-TargetResource
             $certificateTemplate.pKIExtendedKeyUsage = `
                 $ExtendedKeyUsage -join ', '
 
-            for ($i = 0; $i -lt $DefaultCSPs.Count; $i++) {
+            for ($i = 0; $i -lt $DefaultCSPs.Count; $i++)
+            {
                 $DefaultCSPs[$i] = "$($i+1),$DefaultCSPs"
             }
             $certificateTemplate.pKIDefaultCSPs = `
@@ -438,7 +452,8 @@ function Set-TargetResource
             Check, if certificate template alread exists, by checking the
             existence of distinguishedName property
             #>
-            if ($certificateTemplate | Get-Member -Name distinguishedName) {
+            if ($certificateTemplate | Get-Member -Name distinguishedName)
+            {
                 $certificateTemplate.DeleteTree
             }
         }
@@ -475,19 +490,25 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
+        [Parameter()]
         [System.String]
         $DisplayName = $Name,
         [Parameter(Mandatory = $true)]
         [DefaultKeySpec]
         $DefaultKeySpec,
+        [Parameter()]
         [Flags[]]
         $Flags,
+        [Parameter()]
         [System.Int32]
         $MaxIssuingDepth = 0,
+        [Parameter()]
         [Sytem.String[]]
         $CriticalExtensions,
+        [Parameter()]
         [Sytem.String[]]
         $ExtendedKeyUsage,
+        [Parameter()]
         [ValidateSet(
             'Microsoft RSA SChannel Cryptographic Provider',
             'Microsoft DH SChannel Cryptographic Provider',
@@ -501,28 +522,40 @@ function Test-TargetResource
             'Microsoft RSA SChannel Cryptographic Provider',
             'Microsoft DH SChannel Cryptographic Provider'
         ),
+        [Parameter()]
         [System.Int32]
         $RASignature = 0,
+        [Parameter()]
         [EnrollmentFlag[]]
         $EnrollmentFlag,
+        [Parameter()]
         [PrivateKeyFlag[]]
         $PrivateKeyFlag,
+        [Parameter()]
         [CertificateNameFlag[]]
         $CertificateNameFlag,
+        [Parameter()]
         [System.Int32]
         $MinimalKeySize = 2048,
+        [Parameter()]
         [ValidateSet(1, 2, 3, 4)]
         $TemplateSchemaVersion = 2,
+        [Parameter()]
         [System.String]
         $CertTemplateOID,
+        [Parameter()]
         [System.String[]]
         $CertificateApplicationPolicy,
+        [Parameter()]
         [KeyUsage[]]
         $KeyUsage,
+        [Parameter()]
         [System.TimeSpan]
         $ExpirationPeriod = (New-TimeSpan -Days 365),
+        [Parameter()]
         [System.TimeSpan]
         $OverlapPeriod = (New-TimeSpan -Days 30),
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
@@ -547,18 +580,21 @@ function Test-TargetResource
             ) -join '' )
 
             # Compare parameters
-            foreach ($item in $PSBoundParameters.Keys) {
+            foreach ($item in $PSBoundParameters.Keys)
+            {
                 $result = $result `
                     -and ($PSBoundParameters[$item] -eq $currentState[$item])
             }
 
-            if ($result) {
+            if ($result)
+            {
                 Write-Verbose -Message (@(
                     "$($MyInvocation.MyCommand): "
                     $script:localizedData.AdcsTemplateSettingsEqualMessage `
                         -f $Name
                 ) -join '' )
-            } else {
+            } else
+            {
                 Write-Verbose -Message (@(
                     "$($MyInvocation.MyCommand): "
                     $script:localizedData.AdcsTemplateSettingsNotEqualMessage `
@@ -605,7 +641,8 @@ function Test-TargetResource
     return $result
 } # function Test-TargetResource
 
-function Split-Flags {
+function Split-Flags
+{
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
@@ -617,16 +654,19 @@ function Split-Flags {
     )
 
     $result = @()
-    foreach ($itemName in [Enum]::GetNames($Type)){
+    foreach ($itemName in [Enum]::GetNames($Type))
+    {
         $item = [Enum]::Parse($Type, $itemName)
-        if ($Flags -band $item) {
+        if ($Flags -band $item)
+        {
             $result += $item
         }
     }
     return $result
 }
 
-function Join-Flags {
+function Join-Flags
+{
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
@@ -635,7 +675,8 @@ function Join-Flags {
     )
 
     $result = 0
-    foreach ($flag in $Flags) {
+    foreach ($flag in $Flags)
+    {
         $result = $result -bor $flag
     }
     return $result
