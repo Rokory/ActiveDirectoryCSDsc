@@ -134,7 +134,6 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name
-
     )
 
     Write-Verbose -Message ( @(
@@ -144,13 +143,7 @@ function Get-TargetResource
 
     try
     {
-        $ConfigContext = ([ADSI]"LDAP://RootDSE").ConfigurationNamingContext
-        $certificateTemplates = `
-            [ADSI] `
-            "LDAP://CN=Certificate Templates,CN=Public Key Services,CN=Services,$ConfigContext"
-        $certificateTemplate = `
-            [ADSI] `
-            "LDAP://CN=$Name,$($certificateTemplates.distinguishedName)"
+        $certificateTemplate = Get-CertificateTemplate -Name $Name
     }
     catch
     {
@@ -364,13 +357,7 @@ function Set-TargetResource
 
     try
     {
-        $ConfigContext = ([ADSI]"LDAP://RootDSE").ConfigurationNamingContext
-        $certificateTemplates = `
-            [ADSI] `
-            "LDAP://CN=Certificate Templates,CN=Public Key Services,CN=Services,$ConfigContext"
-        $certificateTemplate = `
-            [ADSI] `
-            "LDAP://CN=$Name,$($certificateTemplates.distinguishedName)"
+        $certificateTemplate = Get-CertificateTemplate -Name $Name
     }
     catch
     {
@@ -756,5 +743,25 @@ function Join-Flags
     return $result
 }
 
+Get-CertificateTemplate {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $Name
+    )
 
-# Export-ModuleMember -Function *-TargetResource
+    $ConfigContext = ([ADSI]"LDAP://RootDSE").ConfigurationNamingContext
+    $certificateTemplates = `
+        [ADSI] `
+        "LDAP://CN=Certificate Templates,CN=Public Key Services,CN=Services,$ConfigContext"
+    $certificateTemplate = `
+        [ADSI] `
+        "LDAP://CN=$Name,$($certificateTemplates.distinguishedName)"
+    return $certificateTemplate
+}
+
+
+
+
+Export-ModuleMember -Function *-TargetResource
